@@ -4,20 +4,55 @@ require 'config.php';
 
 // Check if the user is logged in
 $isLoggedIn = isset($_SESSION['user_id']);
+if (!$isLoggedIn) {
+    echo json_encode(['success' => false, 'message' => 'You must be logged in to place an order.']);
+    exit;
+}
+
+// Check if the form is submitted (AJAX)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        // Get the form data
+        $user_id = $_SESSION['user_id'];
+        $email = $_SESSION['email'];
+        $address = $_POST['address'];
+        $contact = $_POST['contact'];
+        $latitude = $_POST['latitude'];  // Get the latitude from the hidden input
+        $longitude = $_POST['longitude']; // Get the longitude from the hidden input
+        $service_type = $_POST['service_type'];
+
+        // Insert the order into the database (without the name column)
+        $stmt = $pdo->prepare("INSERT INTO orders (user_id, email, address, contact_number, latitude, longitude, service_type, order_date)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->execute([$user_id, $email, $address, $contact, $latitude, $longitude, $service_type]);
+
+        // Respond with success
+        echo json_encode(['success' => true, 'message' => 'Order placed successfully!']);
+        exit;
+    } catch (Exception $e) {
+        // If something goes wrong, return an error message
+        echo json_encode(['success' => false, 'message' => 'Something went wrong. Please try again later.']);
+        exit;
+    }
+}
+
+
+// If the user is logged in, fetch their details
 if ($isLoggedIn) {
     $user_id = $_SESSION['user_id']; // Fetch the user ID from session
 
     // Fetch the user details including the profile picture
-    $query = $pdo->prepare("SELECT profile_picture FROM users WHERE id = ?");
+    $query = $pdo->prepare("SELECT profile_picture, name, email FROM users WHERE id = ?");
     $query->execute([$user_id]);
     $user = $query->fetch(PDO::FETCH_ASSOC);
 
     // Set the profile picture in session if it's available
     $_SESSION['profile_pic'] = $user['profile_picture'] ?? 'default-profile.jpg'; // If no picture, set a default
 }
+
 // Fetch all orders for the logged-in user
 $stmt = $pdo->prepare("SELECT * FROM orders WHERE email = ? ORDER BY order_date DESC");
-$stmt->execute([$_SESSION['user_email']]);
+$stmt->execute([$_SESSION['email']]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -101,9 +136,11 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
-    <!-- Order History Section -->
+<!-- Order History Section -->
 <div class="flex-col col-2 container mx-auto p-6 pt-64">
     <h2 class="text-2xl font-bold mb-4">Order History</h2>
+
+    <!-- Display all orders -->
     <?php foreach ($orders as $order): ?>
         <div class="bg-white p-6 mb-4 shadow-lg rounded-lg">
             <h3 class="text-xl font-bold">Order #<?= $order['id']; ?> - <?= ucfirst($order['service_type']); ?></h3>
@@ -168,25 +205,27 @@ function getStatusClass($status) {
 }
 ?>
 
-<!-- JavaScript for Menu Toggle -->
 <script>
-        function toggleMobileMenu() {
-            document.getElementById('mobileMenu').classList.toggle('hidden');
-        }
+    // JavaScript to pass session data to JS
+    const userData = {
+        isLoggedIn: <?= $isLoggedIn ? 'true' : 'false' ?>,
+        userId: '<?= $isLoggedIn ? $_SESSION['user_id'] : '' ?>',
+        email: '<?= $_SESSION['email'] ?>',
+        profilePic: '<?= $_SESSION['profile_pic'] ?>'
+    };
 
-        function showPopup(popupId) {
-            document.getElementById('loginPopup').classList.add('hidden');
-            document.getElementById('registerPopup').classList.add('hidden');
-            document.getElementById(popupId).classList.remove('hidden');
-        }
-        
-        function togglePopup(popupId) {
-            const popup = document.getElementById(popupId);
-            popup.classList.toggle('hidden');
-        }
+    // Handle menu toggling
+    function toggleMobileMenu() {
+        document.getElementById('mobileMenu').classList.toggle('hidden');
+    }
 
-        function toggleDropdown(dropdownId) {
-            const dropdown = document.getElementById(dropdownId);
-            dropdown.classList.toggle('hidden');
-        }
-        </script>
+    function togglePopup(popupId) {
+        const popup = document.getElementById(popupId);
+        popup.classList.toggle('hidden');
+    }
+
+    function toggleDropdown(dropdownId) {
+        const dropdown = document.getElementById(dropdownId);
+        dropdown.classList.toggle('hidden');
+    }
+</script>

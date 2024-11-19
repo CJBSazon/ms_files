@@ -39,10 +39,28 @@ $announcements = $query->fetchAll(PDO::FETCH_ASSOC);
             .mobile-menu { display: none; }
         }
     </style>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                keyframes: {
+                    swipeUp: {
+                        '0%, 50%': { transform: 'translateY(0%)' },
+                        '50.1%, 100%': { transform: 'translateY(-100%)' },
+                    },
+                },
+                animation: {
+                    swipeUp: 'swipeUp 3s infinite',
+                },
+            },
+        },
+    };
+</script>
+
 </head>
 <body class="bg-gray-100">
     <!-- Navbar -->
-    <nav class="fixed w-full bg-orange-500 z-10 bg-opacity-75 shadow-lg p-4 flex items-center justify-between">
+    <nav class="fixed w-full bg-orange-500 z-20 bg-opacity-75 shadow-lg p-4 flex items-center justify-between">
         <!-- Left: Logo -->
         <div class="flex items-center">
             <img src="./img/logo.jpg" alt="Business Logo" class="h-20 w-20 mr-4 rounded-full">
@@ -60,7 +78,7 @@ $announcements = $query->fetchAll(PDO::FETCH_ASSOC);
         <!-- Center: Navigation Links (Hidden on small screens) -->
         <div class="hidden md:flex space-x-4">
             <a href="index.php" class="w-21"><img class="w-12 hover:orange" src="./img/home.png" alt=""></a>
-            <a href="contact.php" class="w-21"><img class="w-12 ml-12" src="./img/info.png" alt=""></a>
+            <a href="about.php" class="w-21"><img class="w-12 ml-12" src="./img/info.png" alt=""></a>
             <a href="services.php" class="w-21"><img class="w-12 ml-12" src="./img/customer-support.png" alt=""></a>
         </div>
 
@@ -87,7 +105,7 @@ $announcements = $query->fetchAll(PDO::FETCH_ASSOC);
     </nav>
 
     <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu bg-orange-500 bg-opacity-75 pt-28 shadow-lg md:hidden hidden">
+    <div id="mobileMenu" class="fixed w-full z-10 mobile-menu bg-orange-500 bg-opacity-75 pt-28 shadow-lg md:hidden hidden">
         <div class="flex flex-col p-4 space-y-2">
             <?php if ($isLoggedIn): ?>
                 <div class="flex items-center space-x-2">
@@ -106,26 +124,48 @@ $announcements = $query->fetchAll(PDO::FETCH_ASSOC);
             <?php endif; ?>
             <hr class="my-2">
             <a href="index.php" class="text-gray-700 hover:text-orange-500">Home</a>
-            <a href="contact.php" class="text-gray-700 hover:text-orange-500">Contact</a>
+            <a href="about.php" class="text-gray-700 hover:text-orange-500">About Us</a>
             <a href="services.php" class="text-gray-700 hover:text-orange-500">Services</a>
         </div>
     </div>
         <!-- First Section: Order Options -->
-        <section class="flex flex-col items-center py-12 bg-gray-100 pt-32">
-        <h2 class="text-2xl font-bold text-gray-700 mb-6">Peka Manyaman Silog Keni Sasmuan</h2>
-        <div class="flex space-x-4">
-            <a href="pickup_order.php"><button class="bg-orange-500 text-white px-6 py-3 rounded-lg shadow hover:bg-orange-600 transition">Order Now!</button></a>
-            <a href=""><button class="bg-amber-800 text-white px-6 py-3 rounded-lg shadow hover:bg-amber-900 transition">Table Reservation</button></a>
+<section class="flex flex-col items-center py-12 bg-gray-100 pt-64" style="background-image: url('./img/bg home.jpg'); background-size: cover; background-position: center; height: 100vh;">
+<section class="flex flex-col items-center py-12 bg-gray-100 p-8 sm:p-16 lg:p-32 xl:p-32 pt-16 sm:pt-24 lg:pt-32 pb-16 sm:pb-24 lg:pb-32 bg-opacity-50 rounded-lg">
+    <h1 class="text-5xl font-bold text-gray-800 relative overflow-hidden h-24">
+        <div class="absolute inset-0 flex flex-col items-center transition-transform duration-700 ease-in-out animate-[swipeUp_3s_infinite]">
+            <span class="text-5xl font-bold">Mabsi</span>
+            <span class="text-5xl font-bold mt-6">Soy</span>
         </div>
-    </section>
+    </h1>
+    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-700 mb-6">
+        Peka Manyaman Silog Keni Sasmuan
+    </h2>
+    <div class="flex flex-wrap justify-center space-x-4">
+        <a href="pickup_order.php">
+            <button class="bg-orange-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow hover:bg-orange-600 transition">
+                Order Now!
+            </button>
+        </a>
+        <a href="">
+            <button class="bg-amber-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow hover:bg-amber-900 transition">
+                Table Reservation
+            </button>
+        </a>
+    </div>
+</section>
+
+</section>
+
 
 <!-- Best Seller Section -->
-<section class="flex flex-col items-center py-12 bg-orange-400" id="best-seller">
-    <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Best Seller Products</h2>
+<section class="flex flex-col items-center py-12 bg-orange-800 bg-opacity-75 pt-32" id="best-seller">
+    <h2 class="text-2xl font-bold text-gray-50 text-center mb-6">Best Seller Products</h2>
 
-    <!-- Best Seller Carousel -->
-    <div id="best-seller-carousel" class="relative w-full">
-        <div class="carousel-container flex space-x-4 overflow-x-auto pb-4 snap-x snap-mandatory">
+    <!-- Best Seller Carousel Section -->
+<section class="relative w-full mt-12 mb-24">
+    <!-- Carousel Container -->
+    <div id="best-seller-carousel" class="relative w-full flex justify-center">
+        <div class="carousel-container flex space-x-4 overflow-x-auto pb-4 snap-x snap-mandatory justify-center">
             <!-- Loop through best sellers and create cards -->
             <?php if (count($bestSellers) > 0): ?>
                 <?php foreach ($bestSellers as $product): ?>
@@ -149,13 +189,16 @@ $announcements = $query->fetchAll(PDO::FETCH_ASSOC);
         </button>
     </div>
 </section>
+</section>
+
+
 
 <!-- Announcement Section -->
-<section class="flex flex-col items-center py-12 bg-gray-100" id="announcement-management">
-    <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Manage Announcements</h2>
+<section class="flex flex-col items-center py-12 bg-gray-100" id="announcement-management" style="background-image: url('./img/bg home.jpg'); background-size: cover; background-position: center;">
+    <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Announcements</h2>
 
     <!-- Announcement Carousel -->
-    <div id="announcement-carousel" class="relative w-full">
+    <div id="announcement-carousel" class="relative w-full flex justify-center">
         <div class="carousel-container flex space-x-4 overflow-x-auto pb-4 snap-x snap-mandatory">
             <!-- Loop through announcements and create cards -->
             <?php if (count($announcements) > 0): ?>
@@ -229,6 +272,19 @@ $announcements = $query->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
     </div>
+
+    <?php include 'chatbot.php'; ?>
+
+    <footer class="bg-orange-500 text-white py-8">
+    <div class="container mx-auto text-center space-y-4">
+        <p>&copy; 2024 Mabsi Soy. All Rights Reserved.</p>
+        <div class="flex justify-center space-x-4">
+            <a href="privacy.php" class="text-gray-400 hover:text-white">Privacy Policy</a>
+            <a href="terms.php" class="text-gray-400 hover:text-white">Terms of Service</a>
+            <a href="contact.php" class="text-gray-400 hover:text-white">Contact Us</a>
+        </div>
+    </div>
+</footer>
 
 
     <!-- JavaScript for Menu Toggle -->

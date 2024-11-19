@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Ordering System</title>
+    <!-- Include Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Food Product Card -->
+    <div class="container mx-auto mt-10 flex justify-center">
+        <div class="max-w-xs bg-white rounded-lg shadow-lg p-4">
+            <img src="food-image.jpg" class="rounded-t-lg w-full h-48 object-cover" alt="Food Image">
+            <div class="card-body p-4">
+                <h5 class="text-xl font-semibold text-gray-800">Pizza</h5>
+                <p class="text-lg text-gray-600">$12.99</p>
+                <button id="orderBtn" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">Order Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal (Hidden by default) -->
+    <div id="orderModal" class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+            <div class="modal-header flex justify-between">
+                <h5 class="text-xl font-semibold text-gray-800">Place Your Order</h5>
+                <button id="closeModal" class="text-gray-500 text-xl">&times;</button>
+            </div>
+            <div class="modal-body mt-4">
+                <!-- User Info Form -->
+                <form id="orderForm">
+                    <div class="mb-4">
+                        <label for="username" class="block text-gray-700 font-semibold">Your Name</label>
+                        <input type="text" class="w-full p-2 border border-gray-300 rounded-md" id="username" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="contact" class="block text-gray-700 font-semibold">Contact Number</label>
+                        <input type="tel" class="w-full p-2 border border-gray-300 rounded-md" id="contact" required>
+                    </div>
+                    <p><strong class="text-gray-700">Current Coordinates: </strong><span id="coordinates">Click on the map</span></p>
+                    <div id="map" class="my-4" style="height: 300px;"></div> <!-- Map will go here -->
+                    <button type="submit" class="w-full mt-3 bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-700 transition">Place Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Page (hidden for now) -->
+    <div id="orderConfirmation" class="container mx-auto mt-10 p-6 bg-white shadow-md rounded-lg" style="display: none;">
+        <h2 class="text-2xl font-semibold mb-4">Order Confirmation</h2>
+        <p><strong>Name:</strong> <span id="confirmName" class="text-lg"></span></p>
+        <p><strong>Contact:</strong> <span id="confirmContact" class="text-lg"></span></p>
+        <p><strong>Food Ordered:</strong> Pizza</p>
+        <p><strong>Coordinates:</strong> <span id="confirmCoordinates" class="text-lg"></span></p>
+    </div>
+
+    <!-- Include Leaflet.js and Tailwind JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        // Initialize the map with Pampanga, Philippines as the default location
+        var map = L.map('map').setView([15.084, 120.648], 13); // Pampanga, Philippines coordinates
+        var marker = L.marker([15.084, 120.648]).addTo(map);
+        var currentCoordinates = { lat: 15.084, lng: 120.648 };
+
+        // Set up OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Update coordinates and marker position on map click
+        map.on('click', function(e) {
+            currentCoordinates.lat = e.latlng.lat;
+            currentCoordinates.lng = e.latlng.lng;
+
+            marker.setLatLng(e.latlng);
+            document.getElementById('coordinates').textContent = `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
+        });
+
+        // Get modal elements
+        const orderModal = document.getElementById('orderModal');
+        const orderBtn = document.getElementById('orderBtn');
+        const closeModal = document.getElementById('closeModal');
+
+        // Show the modal when the "Order Now" button is clicked
+        orderBtn.addEventListener('click', function() {
+            orderModal.classList.remove('hidden'); // Remove the hidden class to show the modal
+        });
+
+        // Hide the modal when the close button is clicked
+        closeModal.addEventListener('click', function() {
+            orderModal.classList.add('hidden'); // Add the hidden class to hide the modal
+        });
+
+        // Handle form submission (when user places an order)
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var username = document.getElementById('username').value;
+            var contact = document.getElementById('contact').value;
+            var coordinates = `${currentCoordinates.lat.toFixed(5)}, ${currentCoordinates.lng.toFixed(5)}`;
+
+            // Hide the modal
+            orderModal.classList.add('hidden');
+
+            // Show the order confirmation page
+            document.getElementById('orderConfirmation').style.display = 'block';
+
+            // Display the order details
+            document.getElementById('confirmName').textContent = username;
+            document.getElementById('confirmContact').textContent = contact;
+            document.getElementById('confirmCoordinates').textContent = coordinates;
+        });
+    </script>
+</body>
+</html>

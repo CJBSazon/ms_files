@@ -7,7 +7,46 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: index.php");
     exit;
 }
+// Handle AJAX requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
+    header('Content-Type: application/json');
 
+    try {
+        // Delete Item
+        if (isset($_POST['delete_item'])) {
+            $item_id = (int)$_POST['item_id'];
+            $query = $pdo->prepare("DELETE FROM menu_items WHERE id = ?");
+            $query->execute([$item_id]);
+            echo json_encode(['status' => 'success', 'message' => 'Item deleted successfully!']);
+        }
+        // Update Item
+        elseif (isset($_POST['update_item'])) {
+            $item_id = (int)$_POST['item_id'];
+            $name = trim($_POST['item_name']);
+            $price = trim($_POST['item_price']);
+            $type = trim($_POST['order_type']);
+
+            if (!empty($name) && !empty($price) && !empty($type)) {
+                $query = $pdo->prepare("UPDATE menu_items SET name = ?, price = ?, type = ? WHERE id = ?");
+                $query->execute([$name, $price, $type, $item_id]);
+                echo json_encode(['status' => 'success', 'message' => 'Item updated successfully!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'All fields are required.']);
+            }
+        }
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => 'An error occurred: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+// Fetch data for display
+try {
+    $menu_items = $pdo->query("SELECT * FROM menu_items")->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    echo "Error fetching data: " . $e->getMessage();
+    exit;
+}
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -22,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (move_uploaded_file($_FILES['product_image']['tmp_name'], $target_file)) {
                 $query = $pdo->prepare("INSERT INTO products (name, description, image) VALUES (?, ?, ?)");
                 $query->execute([$name, $description, $image]);
-                echo "Product uploaded successfully!";
+                echo "";
             } else {
                 echo "Error uploading file.";
             }
@@ -33,12 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $query = $pdo->prepare("UPDATE products SET name = ?, description = ? WHERE id = ?");
             $query->execute([$name, $description, $product_id]);
-            echo "Product updated successfully!";
+            echo "";
         } elseif (isset($_POST['delete_product'])) {
             $product_id = $_POST['product_id'];
             $query = $pdo->prepare("DELETE FROM products WHERE id = ?");
             $query->execute([$product_id]);
-            echo "Product deleted successfully!";
+            echo "";
         }
 
         // Announcement Management
@@ -52,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (move_uploaded_file($_FILES['announcement_image']['tmp_name'], $target_file)) {
                 $query = $pdo->prepare("INSERT INTO announcements (title, description, image) VALUES (?, ?, ?)");
                 $query->execute([$title, $description, $image]);
-                echo "Announcement uploaded successfully!";
+                echo "";
             } else {
                 echo "Error uploading file.";
             }
@@ -63,93 +102,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $query = $pdo->prepare("UPDATE announcements SET title = ?, description = ? WHERE id = ?");
             $query->execute([$title, $description, $announcement_id]);
-            echo "Announcement updated successfully!";
+            echo "";
         } elseif (isset($_POST['delete_announcement'])) {
             $announcement_id = $_POST['announcement_id'];
             $query = $pdo->prepare("DELETE FROM announcements WHERE id = ?");
             $query->execute([$announcement_id]);
-            echo "Announcement deleted successfully!";
+            echo "";
         }
 
-        // Order Management (Uploading menu items)
-        if (isset($_POST['upload_item'])) {
-            $name = $_POST['item_name'];
-            $price = $_POST['item_price'];
-            $type = $_POST['order_type'];
+        // Menu Item Management
+        elseif (isset($_POST['upload_item'])) {
+            $name = trim($_POST['item_name']);
+            $price = trim($_POST['item_price']);
+            $type = trim($_POST['order_type']);
             $image = $_FILES['item_image']['name'];
-            $target_dir = "uploads/";
-            $target_file = $target_dir . basename($image);
 
-            if (move_uploaded_file($_FILES['item_image']['tmp_name'], $target_file)) {
-                $query = $pdo->prepare("INSERT INTO menu_items (name, price, type, image) VALUES (?, ?, ?, ?)");
-                $query->execute([$name, $price, $type, $image]);
-                echo "Item uploaded successfully!";
+            if (!empty($name) && !empty($price) && !empty($type) && !empty($image)) {
+                $target_dir = "uploads/";
+                $target_file = $target_dir . basename($image);
+
+                if (move_uploaded_file($_FILES['item_image']['tmp_name'], $target_file)) {
+                    $query = $pdo->prepare("INSERT INTO menu_items (name, price, type, image) VALUES (?, ?, ?, ?)");
+                    $query->execute([$name, $price, $type, $image]);
+                    echo "";
+                } else {
+                    echo "";
+                }
             } else {
-                echo "Error uploading image.";
+                echo "All fields are required.";
             }
         } elseif (isset($_POST['update_item'])) {
-            $item_id = $_POST['item_id'];
-            $name = $_POST['item_name'];
-            $price = $_POST['item_price'];
-            $type = $_POST['order_type'];
+            $item_id = (int)$_POST['item_id'];
+            $name = trim($_POST['item_name']);
+            $price = trim($_POST['item_price']);
+            $type = trim($_POST['order_type']);
 
-            $query = $pdo->prepare("UPDATE menu_items SET name = ?, price = ?, type = ? WHERE id = ?");
-            $query->execute([$name, $price, $type, $item_id]);
-            echo "Item updated successfully!";
+            if (!empty($name) && !empty($price) && !empty($type)) {
+                $query = $pdo->prepare("UPDATE menu_items SET name = ?, price = ?, type = ? WHERE id = ?");
+                $query->execute([$name, $price, $type, $item_id]);
+                echo "";
+            } else {
+                echo "";
+            }
         } elseif (isset($_POST['delete_item'])) {
-            $item_id = $_POST['item_id'];
+            $item_id = (int)$_POST['item_id'];
             $query = $pdo->prepare("DELETE FROM menu_items WHERE id = ?");
             $query->execute([$item_id]);
-            echo "Item deleted successfully!";
+            echo "";
+        }
+
+        // Order Status Update
+        elseif (isset($_POST['update_status'])) {
+            $order_id = $_POST['order_id'];
+            $status = $_POST['status'] ?? '';
+
+            if (!empty($status)) {
+                $query = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
+                $query->execute([$status, $order_id]);
+                header('Location: admin.php?page=orders');
+                exit();
+            } else {
+                echo "";
+            }
         }
     } catch (Exception $e) {
-        echo "An error occurred: " . $e->getMessage();
+        echo "An error occurred: " . htmlspecialchars($e->getMessage());
     }
 }
 
-// Fetch data for display
+// Fetch Data for Display
 try {
-    $query = $pdo->query("SELECT * FROM menu_items");
-    $menu_items = $query->fetchAll(PDO::FETCH_ASSOC);
+    $menu_items = $pdo->query("SELECT * FROM menu_items")->fetchAll(PDO::FETCH_ASSOC);
+    $products = $pdo->query("SELECT * FROM products")->fetchAll(PDO::FETCH_ASSOC);
+    $announcements = $pdo->query("SELECT * FROM announcements")->fetchAll(PDO::FETCH_ASSOC);
+    $orders = $pdo->query("SELECT * FROM orders")->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
-    echo "Error fetching menu items: " . $e->getMessage();
+    echo "Error fetching data: " . $e->getMessage();
 }
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-    $order_id = $_POST['order_id'];
-
-    // Check if 'status' is set and not empty
-    if (isset($_POST['status']) && !empty($_POST['status'])) {
-        $status = $_POST['status'];
-
-        // Update the order status in the database
-        $update_stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
-        $update_stmt->execute([$status, $order_id]);
-
-        // Redirect to prevent form resubmission
-        header('Location: admin.php?page=orders');
-        exit();
-    } else {
-        // Handle cases where 'status' is missing or empty
-        echo "<div class='bg-red-500 text-white p-4 rounded'>Error: The status field is required.</div>";
-    }
-}
-
-
-
-
-// Fetch all orders
-if (isset($_GET['page']) && $_GET['page'] == 'orders') {
-    $stmt = $pdo->prepare("SELECT * FROM orders ORDER BY order_date DESC");
-    $stmt->execute();
-    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-// Fetch other data for display
-$products = $pdo->query("SELECT * FROM products")->fetchAll(PDO::FETCH_ASSOC);
-$announcements = $pdo->query("SELECT * FROM announcements")->fetchAll(PDO::FETCH_ASSOC);
-$orders = $pdo->query("SELECT * FROM orders")->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -158,36 +189,36 @@ $orders = $pdo->query("SELECT * FROM orders")->fetchAll(PDO::FETCH_ASSOC);
     <title>Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="shortcut icon" href="./img/logo.jpg">
-    <script>
-        function openTab(tabId) {
-            document.querySelectorAll('.section').forEach(section => section.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-        }
-
-        window.onload = function() {
-            openTab('order-management');
-        };
-
-         window.onload = function() {
-            openTab('order-list');
-        };
-    </script>
 </head>
 <body class="bg-gray-100">
 
     <!-- Sidebar -->
-    <div class="w-64 h-screen bg-orange-500 text-white p-4 fixed top-0 left-0">
-        <div class="flex items-center mb-6">
-            <img src="./img/logo.jpg" alt="Business Logo" class="h-16 w-16 mr-4 rounded-full">
-            <span class="text-xl font-semibold">Admin Panel</span>
-        </div>
-        <div class="space-y-4">
-            <a href="javascript:void(0)" onclick="openTab('product-management')" class="block py-2 px-4 bg-orange-600 text-white hover:bg-orange-700 rounded">Product Management</a>
-            <a href="javascript:void(0)" onclick="openTab('announcement-management')" class="block py-2 px-4 bg-orange-600 text-white hover:bg-orange-700 rounded">Announcement Management</a>
-            <a href="javascript:void(0)" onclick="openTab('order-management')" class="block py-2 px-4 bg-orange-600 text-white hover:bg-orange-700 rounded">Order Management</a>
-            <a href="javascript:void(0)" onclick="openTab('order-list')" class="block py-2 px-4 bg-orange-600 text-white hover:bg-orange-700 rounded">Order List</a>
-        </div>
+<div class="w-64 h-screen bg-orange-500 text-white p-6 fixed top-0 left-0 shadow-lg">
+    <div class="flex items-center mb-8">
+        <img src="./img/logo.jpg" alt="Business Logo" class="h-16 w-16 mr-4 rounded-full border-2 border-white">
+        <span class="text-2xl font-semibold">Admin Panel</span>
     </div>
+
+    <div class="space-y-6">
+        <a href="javascript:void(0)" onclick="openTab('product-management')" 
+            class="block py-3 px-5 bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-2 focus:ring-orange-400 transition duration-200">
+            Product Management
+        </a>
+        <a href="javascript:void(0)" onclick="openTab('announcement-management')" 
+            class="block py-3 px-5 bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-2 focus:ring-orange-400 transition duration-200">
+            Announcement Management
+        </a>
+        <a href="javascript:void(0)" onclick="openTab('order-management')" 
+            class="block py-3 px-5 bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-2 focus:ring-orange-400 transition duration-200">
+            Menu Management
+        </a>
+        <a href="javascript:void(0)" onclick="openTab('order-list')" 
+            class="block py-3 px-5 bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-2 focus:ring-orange-400 transition duration-200">
+            Order List
+        </a>
+    </div>
+</div>
+
 
     <!-- Main Content -->
     <div class="ml-64 p-8">
@@ -200,6 +231,51 @@ $orders = $pdo->query("SELECT * FROM orders")->fetchAll(PDO::FETCH_ASSOC);
         
 
     </div>
+    <script>
+        // Function to open specific tab and remember it
+        function openTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => section.classList.add('hidden'));
+            
+            // Show the active tab section
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            // Remember the active tab in localStorage
+            localStorage.setItem('activeTab', tabId);
+        }
 
+        // On page load, open the tab that was previously active
+        window.onload = function() {
+            const activeTab = localStorage.getItem('activeTab');
+            if (activeTab) {
+                openTab(activeTab); // Open the tab stored in localStorage
+            } else {
+                openTab('product-management'); // Default to the first tab if no tab is saved
+            }
+        };
+
+        // Handle form submission via AJAX
+        function handleFormSubmission(event, formId) {
+            event.preventDefault();
+            const formData = new FormData(document.getElementById(formId));
+            formData.append('ajax', true);
+
+            fetch('admin.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    // After success, you may choose to refresh the list or update the UI
+                    location.reload(); // Reload the page to reflect changes without switching tabs
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
 </body>
 </html>

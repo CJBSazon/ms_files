@@ -10,8 +10,10 @@
                     <th class="px-4 py-2">Service Type</th>
                     <th class="px-4 py-2">Address</th>
                     <th class="px-4 py-2">Contact No.</th>
-                    <th class="px-4 py-2">Landmark</th>
                     <th class="px-4 py-2">Order Date</th>
+                    <th class="px-4 py-2">Payment Method</th>
+                    <th class="px-4 py-2">Location (Lat, Long)</th>
+                    <th class="px-4 py-2">Order Items</th>
                     <th class="px-4 py-2">Status</th>
                     <th class="px-4 py-2">Action</th>
                 </tr>
@@ -26,8 +28,25 @@
                                 <td class="px-4 py-2"><?= $order['service_type']; ?></td>
                                 <td class="px-4 py-2"><?= $order['address']; ?></td>
                                 <td class="px-4 py-2"><?= $order['contact_number']; ?></td>
-                                <td class="px-4 py-2"><?= $order['landmark']; ?></td>
                                 <td class="px-4 py-2"><?= date('F j, Y, g:i a', strtotime($order['order_date'])); ?></td>
+                                <td class="px-4 py-2"><?= ucfirst($order['payment_method']); ?></td>
+                                <td class="px-4 py-2"><?= $order['latitude']; ?>, <?= $order['longitude']; ?></td>
+                                <td class="px-4 py-2">
+                                    <?php 
+                                    // Display the order items
+                                    if (isset($order['order_items']) && !empty($order['order_items'])) {
+                                        // If it's an array, join the items by commas
+                                        if (is_array($order['order_items'])) {
+                                            echo implode(', ', $order['order_items']);
+                                        } else {
+                                            // If it's a string, just echo it
+                                            echo $order['order_items'];
+                                        }
+                                    } else {
+                                        echo 'No items'; // Default message if no items are present
+                                    }
+                                    ?>
+                                </td>
                                 <td class="px-4 py-2"><?= ucfirst($order['status']); ?></td>
                                 <td class="px-4 py-2">
                                     <form action="admin.php?page=orders" method="POST">
@@ -46,7 +65,7 @@
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="9" class="text-center text-red-500">No orders found.</td>
+                        <td colspan="11" class="text-center text-red-500">No orders found.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -66,8 +85,10 @@
                     <th class="px-4 py-2">Service Type</th>
                     <th class="px-4 py-2">Address</th>
                     <th class="px-4 py-2">Contact No.</th>
-                    <th class="px-4 py-2">Landmark</th>
                     <th class="px-4 py-2">Order Date</th>
+                    <th class="px-4 py-2">Payment Method</th>
+                    <th class="px-4 py-2">Location (Lat, Long)</th>
+                    <th class="px-4 py-2">Order Items</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,14 +101,29 @@
                                 <td class="px-4 py-2"><?= $order['service_type']; ?></td>
                                 <td class="px-4 py-2"><?= $order['address']; ?></td>
                                 <td class="px-4 py-2"><?= $order['contact_number']; ?></td>
-                                <td class="px-4 py-2"><?= $order['landmark']; ?></td>
                                 <td class="px-4 py-2"><?= date('F j, Y, g:i a', strtotime($order['order_date'])); ?></td>
+                                <td class="px-4 py-2"><?= ucfirst($order['payment_method']); ?></td>
+                                <td class="px-4 py-2"><?= $order['latitude']; ?>, <?= $order['longitude']; ?></td>
+                                <td class="px-4 py-2">
+                                    <?php 
+                                    // Display the order items for completed orders
+                                    if (isset($order['order_items']) && !empty($order['order_items'])) {
+                                        if (is_array($order['order_items'])) {
+                                            echo implode(', ', $order['order_items']);
+                                        } else {
+                                            echo $order['order_items'];
+                                        }
+                                    } else {
+                                        echo 'No items'; // Default message if no items
+                                    }
+                                    ?>
+                                </td>
                             </tr>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="7" class="text-center text-red-500">No completed orders found.</td>
+                        <td colspan="10" class="text-center text-red-500">No completed orders found.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

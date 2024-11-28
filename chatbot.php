@@ -22,7 +22,7 @@ function getChatbotResponse($message)
     if (strtolower($message) == "how can i contact customer support?") {
         return "You can contact customer support by calling this mobile number: 09765635267.";
     } elseif (strtolower($message) == "what payment methods are accepted?") {
-        return "You can pay through GCASH and Cash on Delivery (COD).";
+        return "You can pay through GCASH or Cash on Delivery (COD).";
     }
 
     // Fallback to OpenAI API for other messages
@@ -38,7 +38,7 @@ function getChatbotResponse($message)
     $options = [
         'http' => [
             'method'  => 'POST',
-            'header'  => "Content-Type: application/json\r\n" .
+            'header'  => "Content-Type: application/json\r\n" . 
                         "Authorization: Bearer " . OPENAI_API_KEY . "\r\n",
             'content' => json_encode($data),
         ],
@@ -75,12 +75,12 @@ function getChatbotResponse($message)
 <body class="bg-gray-100">
 
     <!-- Chatbot Button in the Bottom-Right -->
-    <button id="chatButton" class="fixed bottom-4 right-4 p-4 shadow-lg transition duration-300 w-24 rounded-full">
-         <img src="./img/chat.png" alt="">
+    <button id="chatButton" class="fixed bottom-4 right-4 p-4 shadow-lg transition duration-300 w-16 h-16 rounded-full bg-orange-500 hover:bg-orange-600">
+        <img src="./img/chat.png" alt="Chat" class="w-8 h-8">
     </button>
 
     <!-- Chat Window -->
-    <div id="chatWindow" class="fixed bottom-16 right-4 w-96 bg-white p-6 rounded-lg shadow-lg z-30">
+    <div id="chatWindow" class="fixed bottom-16 right-4 w-full max-w-md bg-white p-6 rounded-lg shadow-lg z-30">
         <!-- Close Button (X) -->
         <button id="closeChat" class="absolute top-2 right-2 text-gray-600 hover:text-gray-800 focus:outline-none">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,7 +88,7 @@ function getChatbotResponse($message)
             </svg>
         </button>
 
-        <h1 class="text-3xl font-semibold text-center text-gray-800 mb-6">Chat with Us</h1>
+        <h1 class="text-2xl font-semibold text-center text-gray-800 mb-6">Chat with Us</h1>
 
         <div id="chatbox" class="h-80 overflow-y-auto bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
             <!-- Messages will appear here -->
@@ -97,11 +97,11 @@ function getChatbotResponse($message)
         <!-- Predefined Questions -->
         <div id="predefinedQuestions" class="mb-4">
             <h2 class="text-lg font-semibold text-gray-800 mb-3">Popular Questions</h2>
-            <div class="flex flex-wrap gap-2">
-                <button class="questionBtn px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">How to order?</button>
-                <button class="questionBtn px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">How to register?</button>
-                <button class="questionBtn px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">What payment methods are accepted?</button>
-                <button class="questionBtn px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">How can I contact customer support?</button>
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button class="questionBtn px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">How to order?</button>
+                <button class="questionBtn px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">How to register?</button>
+                <button class="questionBtn px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">What payment methods are accepted?</button>
+                <button class="questionBtn px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">How can I contact customer support?</button>
             </div>
         </div>
 

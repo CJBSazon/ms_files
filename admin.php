@@ -187,8 +187,17 @@ try {
 <head>
     <meta charset="UTF-8">
     <title>Admin Panel</title>
+    <!-- Load Architects Daughter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="shortcut icon" href="./img/logo.jpg">
+
+    <style>
+        /* Apply the Architects Daughter font */
+        body {
+            font-family: 'Architects Daughter', cursive;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
 
@@ -215,6 +224,9 @@ try {
         <a href="javascript:void(0)" onclick="openTab('order-list')" 
             class="block py-3 px-5 bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-2 focus:ring-orange-400 transition duration-200">
             Order List
+        </a>
+        <a href="logout.php">
+            <button class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 mt-6">Logout</button>
         </a>
     </div>
 </div>

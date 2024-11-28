@@ -1,35 +1,70 @@
 <?php
+// process_checkout.php
 session_start();
-require 'config.php';
+require 'config.php'; // Include your database connection
 
-// Check if cart exists and form data is valid
-if (isset($_SESSION['cart']) && !empty($_POST['email']) && isset($_POST['serviceType'])) {
-    $email = $_POST['email'];
-    $serviceType = $_POST['serviceType'];
-    $address = $_POST['address'] ?? null;
-    $contactNumber = $_POST['contactNumber'] ?? null;
-    $landmark = $_POST['landmark'] ?? null;
-    $cart = json_decode($_POST['cart'], true);
+if (isset($_POST['confirm_order']) && isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id'];
 
-    // Save user email and contact in session if they are provided
-    $_SESSION['user_email'] = $email;
-    $_SESSION['user_contact'] = $contactNumber;
+    // Gather the order details from the POST data
+    $serviceType = $_POST['service_type'];
+    $paymentMethod = $_POST['payment_method'];
+    $address = $_POST['address'];
+    $contactNumber = $_POST['contact_no'];
+    $latitude = $_POST['latitude'];
+    $longitude = $_POST['longitude'];
 
-    // Insert order data into the orders table
-    $stmt = $pdo->prepare("INSERT INTO orders (email, service_type, address, contact_number, landmark, order_date) VALUES (?, ?, ?, ?, ?, NOW())");
-    $stmt->execute([$email, $serviceType, $address, $contactNumber, $landmark]);
+    try {
+        // Insert the order into the orders table
+        $stmt = $pdo->prepare("INSERT INTO orders (user_id, service_type, payment_method, address, contact_number, latitude, longitude) 
+                               VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$userId, $serviceType, $paymentMethod, $address, $contactNumber, $latitude, $longitude]);
 
-    // Get the last inserted order ID
-    $orderId = $pdo->lastInsertId();
+        // Get the last inserted order ID
+        $orderId = $pdo->lastInsertId();
 
-    // Insert items from the cart into the order_items table
-    foreach ($cart as $itemId => $item) {
-        $stmt = $pdo->prepare("INSERT INTO order_items (order_id, menu_item_id, quantity, price) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$orderId, $itemId, $item['quantity'], $item['price']]);
+        // Insert the cart items into the order_items table
+        if (isset($_POST['cart']) && is_array($_POST['cart'])) {
+            $stmt = $pdo->prepare("INSERT INTO order_items (order_id, menu_item_id, quantity, price, image) VALUES (?, ?, ?, ?, ?)");
+
+            foreach ($_POST['cart'] as $itemId => $item) {
+                // Insert each cart item into the order_items table
+                $stmt->execute([$orderId, $itemId, $item['quantity'], $item['price'], $item['image']]);
+            }
+
+            // Check if order items were successfully inserted
+            if ($stmt->rowCount() > 0) {
+                // JavaScript to display a success pop-up message
+                echo "<script type='text/javascript'>
+                        alert('Order has been placed successfully! Order ID: $orderId');
+                        window.location.href = 'index.php'; // Redirect to index.php
+                      </script>";
+            } else {
+                // JavaScript to display a failure pop-up message
+                echo "<script type='text/javascript'>
+                        alert('Failed to add items to the order.');
+                        window.location.href = 'index.php'; // Redirect to index.php
+                      </script>";
+            }
+        } else {
+            // No items found in the cart, show an error pop-up
+            echo "<script type='text/javascript'>
+                    alert('No items found in the cart.');
+                    window.location.href = 'index.php'; // Redirect to index.php
+                  </script>";
+        }
+    } catch (PDOException $e) {
+        // If there's a database error, show an error pop-up
+        echo "<script type='text/javascript'>
+                alert('Error: " . $e->getMessage() . "');
+                window.location.href = 'index.php'; // Redirect to index.php
+              </script>";
     }
-
-    echo json_encode(['success' => true]);
 } else {
-    echo json_encode(['success' => false, 'message' => 'Invalid order data']);
+    // Invalid request, show an error pop-up
+    echo "<script type='text/javascript'>
+            alert('Invalid request.');
+            window.location.href = 'index.php'; // Redirect to index.php
+          </script>";
 }
 ?>
